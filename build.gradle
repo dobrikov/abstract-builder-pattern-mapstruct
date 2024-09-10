@@ -1,0 +1,49 @@
+import org.codehaus.groovy.runtime.GStringImpl
+
+buildscript {
+    ext {
+        project.layout.buildDirectory.fileValue(file("${projectDir}/build"))
+        projectBuildDir = "${project.layout.buildDirectory.asFile.get()}" as GStringImpl
+        generatedSrcDir = file("${projectBuildDir}/${genrSrcDir}")
+    }
+}
+
+plugins {
+    id 'java'
+    id 'idea'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.mapstruct:mapstruct:1.6.0'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.0'
+
+    testImplementation platform('org.junit:junit-bom:5.10.3')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+sourceSets {
+    main {
+        java.srcDirs generatedSrcDir
+        resources {
+            srcDir 'resources'
+            include '**/*'
+        }
+    }
+    test {
+        java {
+            srcDirs = ['src/test/java']
+        }
+    }
+}
+
+compileJava {
+    options.generatedSourceOutputDirectory.fileValue(file("${generatedSrcDir}/src/main/java"))
+}
+
+test {
+    useJUnitPlatform()
+}
